@@ -8,6 +8,7 @@ import SKI
 eval I = I
 eval K = K
 eval S = S
+eval (App []) = App []
 eval (App [x]) = eval x
 eval (App (I : xs)) = eval (App xs)
 eval (App (K : [x])) = App (K : [x])
