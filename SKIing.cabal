@@ -26,7 +26,6 @@ source-repository head
 library
   exposed-modules:
       Eval
-      Lib
       SKI
   other-modules:
       Paths_SKIing
