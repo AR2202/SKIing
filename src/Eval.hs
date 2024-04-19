@@ -5,6 +5,7 @@ where
 
 import SKI
 
+eval :: SKI -> Either SKIError SKI
 eval I = Right I
 eval K = Right K
 eval S = Right S
@@ -18,8 +19,8 @@ eval (App (S : x : [y])) = Right $ App (S : x : [y])
 eval (App (S : x : y : z : xs)) =
   case eval (App (x : [z])) of
     Left err -> Left err
-    Right exp -> case eval (App (y : [z])) of
+    Right expr -> case eval (App (y : [z])) of
       Left err -> Left err
-      Right exp2 -> eval $ App (exp : exp2 : xs)
+      Right expr2 -> eval $ App (expr : expr2 : xs)
 eval (App (App xs : ys)) = eval (App (xs ++ ys))
-eval _ = Left EvalError
+--eval _ = Left EvalError
