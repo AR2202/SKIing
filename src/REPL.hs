@@ -1,7 +1,7 @@
 module REPL (repl) where
 
 import Eval
-import SKI
+import Parser
 
 repl :: IO ()
 repl = do

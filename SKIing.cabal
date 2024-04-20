@@ -26,6 +26,7 @@ source-repository head
 library
   exposed-modules:
       Eval
+      Parser
       REPL
       SKI
   other-modules:
