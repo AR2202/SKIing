@@ -1,8 +1,13 @@
+{-# LANGUAGE DeriveGeneric #-}
+
 module SKI (SKI (..), SKIError (..), SKIToken (..)) where
 
-data SKI = S | K | I | App [SKI] deriving (Eq)
+import GHC.Generics
 
-data SKIToken = SToken | IToken | KToken | ParensOpen | ParensClose deriving (Show, Read, Eq)
+-- import Generic.Random (genericArbitrary', uniform)
+data SKI = S | K | I | App [SKI] deriving (Eq, Generic)
+
+data SKIToken = SToken | IToken | KToken | ParensOpen | ParensClose deriving (Show, Read, Eq, Generic)
 
 data SKIError = ParserError | SyntaxError | EvalError deriving (Show, Read, Eq)
 
