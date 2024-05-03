@@ -18,6 +18,6 @@ repl' = do
   input <- getLine
   case input of
     ":q" -> putStrLn "goodbye!"
-    _ -> case parse input >>= eval of
+    _ -> case eval <$>parse input  of
       Left err -> print err >> repl'
       Right ski -> print ski >> repl'

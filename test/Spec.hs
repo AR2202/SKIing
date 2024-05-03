@@ -15,6 +15,7 @@ main =
       -- Unit Test
       evalITest
       evalAppITest
+      evalAppTest
       -- property Tests
       propPrimitivesEval
       propIEval
@@ -26,7 +27,7 @@ main =
 evalIExp :: Expectation
 evalIExp =
   eval I
-    `shouldBe` Right I
+    `shouldBe` I
 
 evalITest :: SpecWith ()
 evalITest =
@@ -39,7 +40,7 @@ evalITest =
 evalIAppExp :: SKI -> Expectation
 evalIAppExp x =
   eval (App [I, x])
-    `shouldBe` Right x
+    `shouldBe` x
 
 evalAppITest :: SpecWith ()
 evalAppITest =
@@ -53,6 +54,22 @@ evalAppITest =
       evalIAppExp I
       evalIAppExp S
 
+evalAppExp :: SKI -> SKI -> Expectation
+evalAppExp x y =
+  eval (App [K, App [x, y], App [y, x]])
+    `shouldBe` eval (App [x, y])
+
+evalAppTest :: SpecWith ()
+evalAppTest =
+  describe "eval"
+    $ do
+      context "when applying I to x"
+    $ do it "should return x"
+    $ do
+      evalAppExp I K
+      evalAppExp K I
+      evalAppExp (App [K, I, I]) S
+
 -- property tests
 newtype SKIPrimitives = SKIPrimitives {getSKIPrimitives :: SKI} deriving (Show, Eq)
 
@@ -61,36 +78,35 @@ instance Arbitrary SKIPrimitives where
   arbitrary = SKIPrimitives <$> elements [I, K, S]
 
 prop_primitives_eval_to_themselves :: SKIPrimitives -> Bool
-prop_primitives_eval_to_themselves x = eval (getSKIPrimitives x) == Right (getSKIPrimitives x)
+prop_primitives_eval_to_themselves x = eval (getSKIPrimitives x) == getSKIPrimitives x
 
 propPrimitivesEval :: SpecWith ()
 propPrimitivesEval = describe "eval" $ do
   it "should evaluate primitives to themselves" $ property prop_primitives_eval_to_themselves
 
 prop_I_is_identity :: SKIPrimitives -> Bool
-prop_I_is_identity x = eval (App [I, getSKIPrimitives x]) == Right (getSKIPrimitives x)
+prop_I_is_identity x = eval (App [I, getSKIPrimitives x]) == getSKIPrimitives x
 
 propIEval :: SpecWith ()
 propIEval = describe "eval" $ do
   it "I should behave like identity function" $ property prop_I_is_identity
 
 prop_K_is_const :: SKIPrimitives -> SKIPrimitives -> Bool
-prop_K_is_const x y = eval (App [K, getSKIPrimitives x, getSKIPrimitives y]) == Right (getSKIPrimitives x)
+prop_K_is_const x y = eval (App [K, getSKIPrimitives x, getSKIPrimitives y]) == getSKIPrimitives x
 
 propKEval :: SpecWith ()
 propKEval = describe "eval" $ do
   it "K should return the first argument" $ property prop_K_is_const
 
-prop_KI ::  SKIPrimitives -> SKIPrimitives -> Bool
-prop_KI x y  = eval (App [K, I, getSKIPrimitives x, getSKIPrimitives y]) == Right (getSKIPrimitives y)
+prop_KI :: SKIPrimitives -> SKIPrimitives -> Bool
+prop_KI x y = eval (App [K, I, getSKIPrimitives x, getSKIPrimitives y]) == getSKIPrimitives y
 
 propKIEval :: SpecWith ()
 propKIEval = describe "eval" $ do
   it "KI should return the second argument" $ property prop_KI
 
-
-prop_SK_is_KI ::  SKIPrimitives -> SKIPrimitives -> Bool
-prop_SK_is_KI x y  = eval (App [S, K, getSKIPrimitives x, getSKIPrimitives y]) == eval (App [K, I, getSKIPrimitives x, getSKIPrimitives y])
+prop_SK_is_KI :: SKIPrimitives -> SKIPrimitives -> Bool
+prop_SK_is_KI x y = eval (App [S, K, getSKIPrimitives x, getSKIPrimitives y]) == eval (App [K, I, getSKIPrimitives x, getSKIPrimitives y])
 
 propSKEval :: SpecWith ()
 propSKEval = describe "eval" $ do
