@@ -20,9 +20,9 @@ parseSKI xs = case sequenceA $ parsed xs of
     parsed (KToken : xs) = Right K : parsed xs
     parsed (IToken : xs) = Right I : parsed xs
     parsed (ParensOpen : xs) = parseParens [] xs
-    parseParens exp (ParensClose : xs) = (App <$> sequenceA exp) : parsed xs
+    parseParens exp (ParensClose : xs) = parseSKI exp : parsed xs
     parseParens _ [] = [Left ParserError]
-    parseParens exp (x : xs) = parseParens ((parsed [x]) ++ exp) xs
+    parseParens exp (x : xs) = parseParens ( exp ++[x]) xs
 
 tokenize :: [Char] -> Either SKIError [SKIToken]
 tokenize = traverse parseChar
