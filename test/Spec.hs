@@ -11,6 +11,10 @@ main =
   hspec $
     do
       -- testing Parser
+      parseITest
+      tokenizeITest
+      syntaxErrTest
+      parseErrTest
       -- testing Eval
       -- Unit Test
       evalITest
@@ -22,6 +26,59 @@ main =
       propKEval
       propKIEval
       propSKEval
+      propSEval
+      propAppPrimitiveEval
+
+-- parsing tests
+parseIExp :: Expectation
+parseIExp =
+  parse "I"
+    `shouldBe` Right (App [I])
+
+parseITest :: SpecWith ()
+parseITest =
+  describe "parse" $
+    context "when parsing \"I\"" $
+      it
+        "should return Right I"
+        parseIExp
+syntaxErrExp :: Expectation
+syntaxErrExp =
+  parse "A"
+    `shouldBe` Left SyntaxError
+
+syntaxErrTest :: SpecWith ()
+syntaxErrTest =
+  describe "parse" $
+    context "when parsing \"A\"" $
+      it
+        "should return a SyntaxError"
+        syntaxErrExp
+
+parseErrExp :: Expectation
+parseErrExp =
+  parse "K(KI"
+    `shouldBe` Left ParserError
+
+parseErrTest :: SpecWith ()
+parseErrTest =
+  describe "parse" $
+    context "when parsing unclosed paretheses" $
+      it
+        "should return a ParseError"
+        parseErrExp
+tokenizeIExp :: Expectation
+tokenizeIExp =
+  tokenize "I"
+    `shouldBe` Right [IToken]
+
+tokenizeITest :: SpecWith ()
+tokenizeITest =
+  describe "tokenize" $
+    context "when parsing \"I\"" $
+      it
+        "should return Right I"
+        tokenizeIExp
 
 -- evaluation tests
 evalIExp :: Expectation
@@ -111,3 +168,17 @@ prop_SK_is_KI x y = eval (App [S, K, getSKIPrimitives x, getSKIPrimitives y]) ==
 propSKEval :: SpecWith ()
 propSKEval = describe "eval" $ do
   it "SK should behave like KI" $ property prop_SK_is_KI
+
+prop_S_apply :: SKIPrimitives -> SKIPrimitives -> SKIPrimitives -> Bool
+prop_S_apply x y z = eval (App [S, getSKIPrimitives x, getSKIPrimitives y, getSKIPrimitives z]) == eval (App [App [getSKIPrimitives x, getSKIPrimitives z], App [getSKIPrimitives y, getSKIPrimitives z]])
+
+propSEval :: SpecWith ()
+propSEval = describe "eval" $ do
+  it "S should apply the first argument to the third and the second to the third" $ property prop_S_apply
+
+prop_app_primitive_returns_primitive :: SKIPrimitives -> Bool
+prop_app_primitive_returns_primitive x = eval (App [getSKIPrimitives x]) == eval (getSKIPrimitives x)
+
+propAppPrimitiveEval :: SpecWith ()
+propAppPrimitiveEval = describe "eval" $ do
+  it "evaluating primitives wrapped in App should evaluate to the primitive" $ property prop_app_primitive_returns_primitive

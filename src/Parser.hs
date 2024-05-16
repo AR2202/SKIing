@@ -1,4 +1,4 @@
-module Parser (parse) where
+module Parser (parse, tokenize) where
 
 import SKI
 
