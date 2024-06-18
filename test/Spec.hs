@@ -30,11 +30,12 @@ main =
       propAppPrimitiveEval
 
 -- parsing tests
+-- | expectation for test that I is parsed as Primitive I
 parseIExp :: Expectation
 parseIExp =
   parse "I"
     `shouldBe` Right (App [I])
-
+-- |  test that I is parsed as Primitive I
 parseITest :: SpecWith ()
 parseITest =
   describe "parse" $
@@ -42,24 +43,38 @@ parseITest =
       it
         "should return Right I"
         parseIExp
+-- | expectation of Syntax Error with non SKI primitive
 syntaxErrExp :: Expectation
 syntaxErrExp =
   parse "A"
     `shouldBe` Left SyntaxError
-
+-- | expectation of Syntax Error with non SKI primitive in parens
+syntaxErrinParensExp :: Expectation
+syntaxErrinParensExp =
+  parse "I(KA)"
+    `shouldBe` Left SyntaxError
+-- | expectation of Syntax Error with non SKI primitive in unclosed parens
+syntaxErrinUnclosedParensExp :: Expectation
+syntaxErrinUnclosedParensExp =
+  parse "I(KA"
+    `shouldBe` Left SyntaxError
+-- | test Syntax error is correctly returned in various invalid syntax settings
 syntaxErrTest :: SpecWith ()
 syntaxErrTest =
-  describe "parse" $
-    context "when parsing \"A\"" $
-      it
+  describe "parse" 
+  $ do
+    context "when parsing \"A\"" 
+  $ do it
         "should return a SyntaxError"
-        syntaxErrExp
-
+  $ do  syntaxErrExp   
+        syntaxErrinParensExp
+        syntaxErrinUnclosedParensExp
+-- | expectation of Parse Error with unclosed parens
 parseErrExp :: Expectation
 parseErrExp =
   parse "K(KI"
     `shouldBe` Left ParserError
-
+-- | tests unclosed parens return a parse error
 parseErrTest :: SpecWith ()
 parseErrTest =
   describe "parse" $
@@ -67,11 +82,12 @@ parseErrTest =
       it
         "should return a ParseError"
         parseErrExp
+-- | expectation of tokenizing I as IToken
 tokenizeIExp :: Expectation
 tokenizeIExp =
   tokenize "I"
     `shouldBe` Right [IToken]
-
+-- | test for tokenizing a single I
 tokenizeITest :: SpecWith ()
 tokenizeITest =
   describe "tokenize" $
